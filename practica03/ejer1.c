@@ -3,57 +3,115 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-//#define TAG 
-#define MAX 10
+#define N 10
+#define TAG 1
 
-int main (int argc, char *argv[])
-{
-    int TAG;
-	int vec[MAX];
-	int size, rank, n, i;
+void generarvalores (int *ingresos, int *gastos){
+	
+	int i;
+
+	for (i=0; i<N; i++) {
+
+		printf("Ingresos | Gastos del cliente %d\n", i+1);
+		ingresos[i] = (double)((rand()) % 1000000) / 10000;
+		gastos[i] = (double)((rand()) % 1000000) / 10000;
+		printf("   %d\t |   %d\n", ingresos[i], gastos[i]);
+	}
+}
+
+double calcularsuma (int *a, int num){
+	
+	double total;
+	
+
+	for (int i=0; i<num; i++){
+	
+		total = total + a[i];
+	}
+
+	return total;
+}
+
+int main (int argc, char *argv[]){
+	
+	int ingresos[N];
+	int gastos[N];	
+	int size, rank, ini, repartoNucleo, resto, numelementos;
+	double sumaIngresos, sumagas, totalIngresos, totalGastos, total;
 	MPI_Status status;
-    srand (time(NULL));
+
 	MPI_Init (&argc, &argv);
 	MPI_Comm_size (MPI_COMM_WORLD, &size);
 	MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+	
+	if (rank == 0){
+	
+		srand(time(NULL));
 
-	if (size > 2){
-		
-        if (rank == 0){
-			printf ("\nSe necesitan solo 2 procesadores aunque se hayan habilitado %d\n\n", size);
-		}
-	}else if(size == 1){
-        printf("Seleccionado solo 1 procesador para la ejecución. Selecciona 2 o más\n");
-        MPI_Finalize();
-        exit(-1);
-    }
+		//Generamos valores aleatorios		
+		generarvalores(ingresos, gastos);
 
-	if (rank == 0)
-	{
-		for (n=1; n<=MAX; n++)
-		{
-            TAG = rand();
-            printf("TAG a enviar %d\n", TAG);
-			MPI_Send (&n, 1, MPI_INT, 1, TAG, MPI_COMM_WORLD);
+		//Repartimos valores entre nucleos
+		repartoNucleo = N / size;
+		resto = N % size;
+		ini = repartoNucleo;
+	
+		for (int i=1; i<size; i++){
+	
+			numelementos = repartoNucleo;
+	
+			if (resto > 0){
+	
+				numelementos++;
+				resto--;
+			}
+	
+			MPI_Send (&numelementos, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
+			MPI_Send (&ingresos[ini], numelementos, MPI_INT, i, TAG, MPI_COMM_WORLD);
+			MPI_Send (&gastos[ini], numelementos, MPI_INT, i, TAG, MPI_COMM_WORLD);
+			
+			ini = ini + numelementos;
 		}
-		MPI_Recv (&vec[0], MAX, MPI_INT, 1, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        TAG = status.MPI_TAG;
-        printf("TAG de array: %d\n", TAG);
-		printf ("\nCuadrados de los %d primeros numeros naturales\n", MAX);
-		for (i=0; i<MAX; i++)
-		{
-			printf ("Valor: %d\n", vec[i]);
-		}
+	
+		numelementos = repartoNucleo;
+	
+		sumaIngresos = calcularsuma (ingresos, numelementos);
+		sumagas = calcularsuma (gastos, numelementos);
+
+	}else {
+	
+		MPI_Recv (&numelementos, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+		MPI_Recv (ingresos, numelementos, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+		MPI_Recv (gastos, numelementos, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
 	}
-	else if(rank == 1){
-		for (i=0; i<MAX; i++){
-			MPI_Recv (&n, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            TAG = status.MPI_TAG;
-            printf("\t\t\t\t\tTAG recibido: %d\n", TAG);
-			vec[i] = n*n;
+	
+
+	
+	if (rank == 0){
+	
+		totalIngresos = sumaIngresos;
+		totalGastos = sumagas;
+	
+		for (int i=1; i<size; i++){
+	
+			MPI_Recv (&sumaIngresos, 1, MPI_DOUBLE, i, TAG, MPI_COMM_WORLD, &status);
+			MPI_Recv (&sumagas, 1, MPI_DOUBLE, i, TAG, MPI_COMM_WORLD, &status);
+			totalIngresos = totalIngresos + sumaIngresos;
+			totalGastos = totalGastos + sumagas;
 		}
-        TAG = rand();
-		MPI_Send (&vec[0], MAX, MPI_INT, 0, TAG, MPI_COMM_WORLD);
+	
+		printf ("\nSuma ingresos: %lf", totalIngresos);
+		printf ("\nSuma gastos: %lf", totalGastos);
+		total = totalIngresos - totalGastos;
+		printf ("\nEl total es: %lf\n", total);
+	
+	}else {
+	
+		MPI_Send (&sumaIngresos, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
+		MPI_Send (&sumagas, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
 	}
+
 	MPI_Finalize();
 }
+
+
