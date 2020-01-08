@@ -27,7 +27,7 @@ void generarvalores (double *vector, int total){
 
 int main (int argc, char *argv[]){
 	
-	int size, rank;
+	int size, rank, i;
     
     bool flag = true;
     int total;
@@ -44,8 +44,8 @@ int main (int argc, char *argv[]){
 
         MPI_Send (&vector, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
     }else{
-        for(1...size){
-
+        for(i=1; i<size; i++){
+            printf("Hola\n");
         }
     }
     
