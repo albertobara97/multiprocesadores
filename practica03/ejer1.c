@@ -37,7 +37,7 @@ int main (int argc, char *argv[]){
 	int ingresos[N];
 	int gastos[N];	
 	int size, rank, ini, repartoNucleo, resto, numelementos;
-	double sumaIngresos, sumagas, totalIngresos, totalGastos, total;
+	double sumaIngresos, sumaGastos, totalIngresos, totalGastos, total;
 	MPI_Status status;
 
 	MPI_Init (&argc, &argv);
@@ -76,7 +76,7 @@ int main (int argc, char *argv[]){
 		numelementos = repartoNucleo;
 	
 		sumaIngresos = calcularsuma (ingresos, numelementos);
-		sumagas = calcularsuma (gastos, numelementos);
+		sumaGastos = calcularsuma (gastos, numelementos);
 
 	}else {
 	
@@ -90,14 +90,14 @@ int main (int argc, char *argv[]){
 	if (rank == 0){
 	
 		totalIngresos = sumaIngresos;
-		totalGastos = sumagas;
+		totalGastos = sumaGastos;
 	
 		for (int i=1; i<size; i++){
 	
 			MPI_Recv (&sumaIngresos, 1, MPI_DOUBLE, i, TAG, MPI_COMM_WORLD, &status);
-			MPI_Recv (&sumagas, 1, MPI_DOUBLE, i, TAG, MPI_COMM_WORLD, &status);
+			MPI_Recv (&sumaGastos, 1, MPI_DOUBLE, i, TAG, MPI_COMM_WORLD, &status);
 			totalIngresos = totalIngresos + sumaIngresos;
-			totalGastos = totalGastos + sumagas;
+			totalGastos = totalGastos + sumaGastos;
 		}
 	
 		printf ("\nTotal ingresos: %.2f", totalIngresos);
@@ -108,7 +108,7 @@ int main (int argc, char *argv[]){
 	}else {
 	
 		MPI_Send (&sumaIngresos, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
-		MPI_Send (&sumagas, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
+		MPI_Send (&sumaGastos, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
 	}
 
 	MPI_Finalize();
