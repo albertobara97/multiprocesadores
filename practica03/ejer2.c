@@ -32,7 +32,7 @@ void generarvalores (double *vector, int total){
 //Busca el mínimo de un vector que se le pasa por parametro
 double buscarMinimo(double *vector, int total){
     //Valor máximo para evitar errores
-    double minimo = __INT_MAX__;
+    double minimo = __INT_MAX__; 
 
     //recorre el vector en busca del valor minimo
     for(int i = 0; i<total; i++){
