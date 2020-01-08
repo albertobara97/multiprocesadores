@@ -13,8 +13,8 @@ void generarvalores (int *ingresos, int *gastos){
 	for (i=0; i<N; i++) {
 
 		printf("Ingresos | Gastos del cliente %d\n", i+1);
-		ingresos[i] = (double)((rand()) % 1000000) / 10000;
-		gastos[i] = (double)((rand()) % 1000000) / 10000;
+		ingresos[i] = (double)((rand()) % 100);
+		gastos[i] = (double)((rand()) % 100);
 		printf("   %d\t |   %d\n", ingresos[i], gastos[i]);
 	}
 }
@@ -100,10 +100,10 @@ int main (int argc, char *argv[]){
 			totalGastos = totalGastos + sumagas;
 		}
 	
-		printf ("\nSuma ingresos: %lf", totalIngresos);
-		printf ("\nSuma gastos: %lf", totalGastos);
+		printf ("\nTotal ingresos: %.2f", totalIngresos);
+		printf ("\nTotal gastos: %.2f", totalGastos);
 		total = totalIngresos - totalGastos;
-		printf ("\nEl total es: %lf\n", total);
+		printf ("\nEl balance final es: %.2f\n", total);
 	
 	}else {
 	
