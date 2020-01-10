@@ -78,6 +78,7 @@ int main (int argc, char *argv[]){
         
         bool flag = true;
         
+        //Interactua con el usuario para preguntar por el parametro de los elementos del array
         while(flag){
         printf("Numero de elementos a generar para ambos arrays: \n");
         scanf ("%d", &total);
@@ -128,7 +129,6 @@ int main (int argc, char *argv[]){
 		}
         
         printf("Resultado final %.2f\n\n", resultado);
-
         
     }else{//Si no es el nucleo principal...
 
