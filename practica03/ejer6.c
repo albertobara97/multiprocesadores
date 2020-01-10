@@ -3,24 +3,25 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <math.h> 
+#include <stdbool.h>
 
 #define TAG 1
 
 int operacionesDisponibles(){
-
-    printf("\nLlego aqui\n");
+    
+    bool flag = true;
     int operacion;
-    printf("Elija una operación: \n");
-    scanf ("%i", &operacion);
-
-    if(operacion<0 || operacion>4){
-
-        printf("Operación %d no válida.\n", operacion);
-        exit(-1);
-    }else
-    {
-        printf("Ok.\n");
-    }
+    while(flag){
+            printf("operacion a realizar?\n\t1. Pasar una palabra a mayuscula\n\t2. Calcular suma de un vector y la raiz cuadrada de la suma \n\t3. Calcular los enteros correspondientes de una frase\n\t4. Realizar todas las operaciones anteriores\n");
+            scanf ("%d", &operacion);
+            //printf("Alto de la matriz? \n");
+            //scanf("%d", &alto);
+            if(operacion < 1 || operacion < 1){
+                printf("Debes de escoger entre 0 y 4\n");
+            }else{
+                flag = false;
+            }
+        }flag = true;
     return operacion;
 }
 
