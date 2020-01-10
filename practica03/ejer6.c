@@ -11,7 +11,7 @@ int operacionesDisponibles(){
     printf("\nLlego aqui\n");
     int operacion;
     printf("Elija una operación: \n");
-    scanf ("%d", &operacion);
+    scanf ("%i", &operacion);
 
     if(operacion<0 || operacion>4){
 
@@ -19,7 +19,7 @@ int operacionesDisponibles(){
         exit(-1);
     }else
     {
-        printf("Número entre 0 y 4 ");
+        printf("Ok.\n");
     }
     return operacion;
 }
@@ -44,21 +44,32 @@ int main (int argc, char *argv[]){
         exit(-1);
     }
     switch (rank){
-        case 0: do{
+        case 0:
             operacion = operacionesDisponibles();
 
-            for (i=1; i<size; i++)
-			{
+            /*for (i=1; i<size; i++){
 				MPI_Send (&operacion, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
-			}
+			}*/
 
             switch(operacion){
-                case 0: printf("\nSaliendo del programa...\n");
+                case 0: printf("\nSaliendo del programa...\n\n");
+                MPI_Finalize();
+                exit(0);
 				break;
+
+                case 1: printf("Voy a decirle al procesador 1 que te pregunte una letra que luego pasaré a mayuscula\n\n");
+                break;
+
+                case 2: printf("voy a enviarle procesador 2 un vector con 10 numeros reales y el ya hara algunos calculos\n\n");
+                break;
+
+                case 3: printf("Voy a enviarle una señal al procesador 3 para que el ya haga sus cosas\n\n");
+                break;
+
+                case 4: printf("Ea, Todos los procesadores a trabajar. Yo me quedo aqui mirando como trabajais\n\n");
+                break;
             }
 
-        }while (operacion != 0);
-        break;
     }
     
     MPI_Finalize();
