@@ -11,11 +11,11 @@ int operacionesDisponibles(){
     printf("\nLlego aqui\n");
     int operacion;
     printf("Elija una operación: \n");
-    scanf ("%i", &operacion);
+    scanf ("%d", &operacion);
 
-    if(operacion<0 && operacion>4){
+    if(operacion<0 || operacion>4){
 
-        printf("Operación %i no válida.", &operacion);
+        printf("Operación %d no válida.\n", operacion);
         exit(-1);
     }else
     {
@@ -56,13 +56,6 @@ int main (int argc, char *argv[]){
                 case 0: printf("\nSaliendo del programa...\n");
 				break;
             }
-
-
-
-
-
-
-
 
         }while (operacion != 0);
         break;
