@@ -29,7 +29,7 @@ void generarvalores (double *vector, int total){
 	}
 }
 
-//Calcula el producto escalar del vector1 y el vector 2
+//Calcula el producto escalar del vector1 y el vector2
 double calcularProductoEscalar(double *vector1, double *vector2, int tamano){
 
     double productoEscalar = 0;
@@ -128,6 +128,31 @@ int main (int argc, char *argv[]){
 		}
         
         printf("Resultado final %.2f\n\n", resultado);
+        /*printf("MMMMMMMMMMMMMMWXkl:::,.....;cox0NMMMMMMMMMMMMMMMMM\n");
+        printf("MMMMMMMMMMMMWKd;.. .............cxXWMMMMMMMMMMMMMM\n");
+        printf("MMMMMMMMMMMNk:....................:OWMMMMMMMMMMMMM\n");
+        printf("MMMMMMMMMMXd;,...,:clc;............;kNMMMMMMMMMMMM\n");
+        printf("MMMMMMMMMNx;,,..:dxkkkkxolc;........:OWMMMMMMMMMMM\n");
+        printf("MMMMMMMMM0l;;,.;oxkO0OO0O0OOxc.. ...,lKMMMMMMMMMMM\n");
+        printf("MMMMMMMMWk:;,,;cxkO0000000000Oxc,....;kWMMMMMMMMMM\n");
+        printf("MMMMMMMMXo:;.,;cddxkO0KKKK0Okxxdo;..,,lXMMMMMMMMMM\n");
+        printf("MMMMMMMM0l;..,:lllclok0K0Okolclooc..,,;kWMMMMMMMMM\n");
+        printf("MMMMMMMWOc,..;llllloxxkOkkkxollldl..,,,oNMMMMMMMMM\n");
+        printf("MMMMMMMNx:,.,:oxkOOkxxxxxxkOOOOkxo..;,.cKMMMMMMMMM\n");
+        printf("MMMMMMMXo;,..;dxOOOkxxxkxxxkOO0Oxo,.;,.;OMMMMMMMMM\n");
+        printf("MMMMMMMKl;,...dkO0OkxxkOkxxkO00Oko..;,.,kWMMMMMMMM\n");
+        printf("MMMMMMM0c;;. .okkOkkkkOOOOOkkkOkxl..;,..kWMMMMMMMM\n");
+        printf("MMMMMMM0c;;. .:xkkdlldxxddoldkkkx;..;,..kWMMMMMMMM\n");
+        printf("MMMMMMMKo:;,. .cxkxdloodddddkkkxl. .;..,0MMMMMMMMM\n");
+        printf("MMMMMMMWkc:;.  .lxxxkkOOOOOOkkdl,..,,..lXMMMMMMMMM\n");
+        printf("MMMMMMMMNkc:;.;c:oxkkOOOOOOkkdc;...,..;OWMMMMMMMMM\n");
+        printf("MMMMMMMMMW0lccclcokOOO0000OOxdol,.,,,cOWMMMMMMMMMM\n");
+        printf("MMMMMMMMMW0dooooxxk00KKKK00OOOdc:llllx0KXWWMMMMMMM\n");
+        printf("MMMMMMWNXKkdxxxxkOO00KKKKKKKKKOkkOOkkkxxk0KNWWMMMM\n");
+        printf("MMWWNNXXXK00OkkOOO000KKKKKKKKKK0000O0OO00KXXXNNWWM\n");
+        printf("WNXXXXXNNNKK00OOO0000KKKKKKKKKK000OOO0KKXNNNNXXXNN\n");
+        printf("XXXXNNNNNWNNXKK0OkkO0KKKKKKKKK0Okkk0KKXNWWNNNNNNNN\n");
+        printf("XXNNNNNWWWWNNWXKXKkkO0KKKKKK00Okk0KXXNWWWWNWWWWWWW\n");*/
 
         
     }else{//Si no es el nucleo principal...

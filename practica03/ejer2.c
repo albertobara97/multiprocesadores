@@ -61,20 +61,17 @@ int main (int argc, char *argv[]){
 	MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 
     if(size != 2){
-        printf("Este programa debe ejecutarse con 2 nucleos.");
+        printf("Este programa debe ejecutarse con 2 nucleos.\n");
         MPI_Finalize();
         exit(-1);
     }
 
     //Si es el nucleo principal...
-    if(rank == 0){
-                
+    if(rank == 0){       
         generarvalores(vector, total);
         MPI_Send (vector, total, MPI_DOUBLE, 1, TAG, MPI_COMM_WORLD);
-        
-
-        
-    }else{//Si no es el nucleo principal...
+    }     
+    else{//Si no es el nucleo principal...
 
         MPI_Recv (vector, total, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD, &status);
         
