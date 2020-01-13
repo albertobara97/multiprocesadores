@@ -22,8 +22,8 @@ ejer3 : ejer3.c
 	$(CC) $(DEBUG) $(FLAGS) -o ejer3 ejer3.c  $(INC)
 
 #-------------------------------------------------------------------------------
-ejer4 : ejer4.c 
-	$(CC) $(DEBUG) $(FLAGS) -o ejer4 ejer4.c  $(INC)
+ejer4 : ejer4a.c 
+	$(CC) $(DEBUG) $(FLAGS) -o ejer4a ejer4a.c  $(INC)
 
 #-------------------------------------------------------------------------------
 ejer5 : ejer5.c 
