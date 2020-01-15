@@ -52,12 +52,13 @@ int main (int argc, char *argv[]){
     }
     switch (rank){
         case 0:
+        do{
             operacion = operacionesDisponibles();
 
             for (int i = 1; i<size; i++){
 				MPI_Send (&operacion, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
 			}
-
+            
             switch(operacion){
                 case 0: printf("\nSaliendo del programa...\n\n");
                     MPI_Finalize();
@@ -114,9 +115,10 @@ int main (int argc, char *argv[]){
 
                 break;
             }
+        }while(operacion != 0);
         break;
     
-        case 1:
+        case 1:do{
         //printf("Soy procesador 1, entro siempre\n"); 
         MPI_Recv (&operacion, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
         //flag = true;
@@ -132,9 +134,11 @@ int main (int argc, char *argv[]){
             MPI_Send (cadena, LONGITUD_CADENA, MPI_CHAR, 0, TAG, MPI_COMM_WORLD);
             
         }
+        }while(operacion != 0);
         break;
 
         case 2:
+        do{
         //printf("Soy procesador 2, entro siempre\n"); 
         //printf("Esperando el receive...");
         MPI_Recv (&operacion, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
@@ -160,9 +164,11 @@ int main (int argc, char *argv[]){
 				raizCuadrada = suma; 
 				MPI_Send (&raizCuadrada, 1, MPI_DOUBLE, 0, TAG, MPI_COMM_WORLD);
         }
+        }while(operacion != 0);
         break;
 
         case 3:
+        do{
         //printf("Soy procesador 3, entro siempre\n"); 
         //printf("Esperando el receive...");
         MPI_Recv (&operacion, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
@@ -179,8 +185,9 @@ int main (int argc, char *argv[]){
             }
             MPI_Send (&posicionesCadena, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD);
         }
+        }while(operacion != 0);
         break;
-
+        
     }
     
     MPI_Finalize();
