@@ -102,10 +102,10 @@ int main (int argc, char *argv[]){
                     printf("\nEl mensaje en mayuscula: %s\n", cadena);
                     
                     //Interaccion con el procesador 2
-                    //double vector[10] = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10};
-                    //tamanoVector = 10;
+                    double vector4[10] = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10};
+                    tamanoVector = 10;
                     MPI_Send (&tamanoVector, 1, MPI_INT, 2, TAG, MPI_COMM_WORLD);
-                    MPI_Send(&vector[0], 10, MPI_DOUBLE, 2, TAG, MPI_COMM_WORLD);
+                    MPI_Send(&vector4[0], 10, MPI_DOUBLE, 2, TAG, MPI_COMM_WORLD);
                     MPI_Recv(&raizCuadrada, 1, MPI_DOUBLE, 2, TAG, MPI_COMM_WORLD, &status);
                     printf("\nRaiz cuadrada de la suma de los elementos vector: %.2f\n", raizCuadrada);
 
