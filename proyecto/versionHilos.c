@@ -20,13 +20,11 @@ typedef struct{
 }tipohilo;
 
 void *convolucion(void *parametro){
-  int x, y;
-  int suma;
-  int i, j, f;
+  int x, y, suma, i, j, f;
+
   tipohilo *h = (tipohilo *) parametro;
 
   printf ("\nFila inicio %d  y total %d", h->filainicio, h->numfilas);
-  fflush (stdout);
   f = h->filainicio;
   for (x = 0; x < h->numfilas; x++){
     for (y = 1; y < h->datos->alto-1; y++){
@@ -71,12 +69,15 @@ int main(int argc, char *argv[]){
       misdatos.nucleo[i][j] = -1;
     }
   }misdatos.nucleo[1][1] = 1;
+  
   misdatos.k = 0;
+  
   for (i = 0; i < 3; i++){
     for (j = 0; j < 3; j++){
       misdatos.k = misdatos.k + misdatos.nucleo[i][j];
     }
   }
+  
   mishilos = (tipohilo *) malloc (sizeof(tipohilo) * numhilos);
   mispthread = (pthread_t *) malloc (sizeof(pthread_t) * numhilos);
 
