@@ -159,14 +159,14 @@ int main(int argc, char *argv[]){
          //pgmwrite(original, "lenax.pgm", largo, numfilas+2);
          salida = (unsigned char **)GetMem2D (numfilas+2, alto, sizeof(unsigned char));
    }
-   convolucion (original, numfilas+2, alto, nucleo, k, salida);
+   convolucion (original, numfilas+2, largo, nucleo, k, salida);
    f = numfilas+1;
    if (rank == 0)
    {
       for (i=1; i<size; i++)
       {
          MPI_Recv (&numfilas, 1, MPI_INT, i, TAG, MPI_COMM_WORLD, &status);
-	 aux = (unsigned char *)GetMem (alto, sizeof(unsigned char));
+	 aux = (unsigned char *)GetMem2D (alto, largo, sizeof(unsigned char));
          for (j=0; j<numfilas; j++)
          {
             printf ("\nrecibiendo fila: %d", f+j); fflush (stdout);
