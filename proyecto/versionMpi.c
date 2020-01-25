@@ -7,14 +7,14 @@
 #define TAG 10
 #define tamanoNucleo 3
 
-void convolucion(unsigned char **original, int numfilas, int largo, int **nucleo, int k, unsigned char **salida) {
+void convolucion(unsigned char **original, int numfilas, int alto, int **nucleo, int k, unsigned char **salida, int rank) {
    int x, y;
    int suma;
    int i, j;
 
    for (x=0; x<numfilas; x++){
-      for (y=0; y<largo; y++){
-	      if (x == 0 || x == numfilas-1 || y == 0 || y == largo-1)
+      for (y=0; y<alto; y++){
+	      if (x == 0 || x == numfilas-1 || y == 0 || y == alto-1)
 	         salida[x][y] = original[x][y];
 	      else{
 	         suma = 0;
@@ -23,20 +23,24 @@ void convolucion(unsigned char **original, int numfilas, int largo, int **nucleo
                  suma = suma + original[(x-1)+i][(y-1)+j] * nucleo[i][j];
               }
            }
-	         if(k==0)
+	         if(k==0){
+               //printf("[Procesador %d](%d, %d)-------k = 0...\n", rank, x, y);
         	      salida[x][y] = suma;
-            else
+            }else{
+               //printf("[Procesador %d](%d, %d)-------k != 0...\n", rank, x, y);
         	      salida[x][y] = suma/k;
+            }
 	      }
       }
    }
+   printf("llego");
 }
 
 /* * * * *          * * * * *          * * * * *          * * * * */
 
 int main(int argc, char *argv[]){
-   int largo, alto;
-   int k, rank, size, i, j, f, fila, filainicio, numfilas, numerofilas, excedente;
+   int alto, ancho;
+   int k, rank, size, i, j, f/*, fila*/, filainicio, numfilas, numerofilas, excedente;
    unsigned char** original;
    unsigned char** salida;
    unsigned char* aux;
@@ -54,13 +58,11 @@ int main(int argc, char *argv[]){
       for (j = 0; j < tamanoNucleo; j++){
          nucleo[i][j] = -1;
       }
-   }
-   
-   nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1;
+   }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 8;
 
    if (rank == 0){
    
-      original = pgmread("lena_original.pgm", &largo, &alto);
+      original = pgmread("lena_original.pgm", &alto, &ancho);
 
       
       k = 0;
@@ -71,13 +73,12 @@ int main(int argc, char *argv[]){
       
       for (i=1; i<size; i++){
 
-         MPI_Send(&alto, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
+         MPI_Send(&ancho, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
          MPI_Send(&k, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
       }
 
-      
-      numerofilas = (largo-2) / size;
-      excedente = (largo-2) % size;
+      numerofilas = (alto-2) / size;
+      excedente = (alto-2) % size;
       printf("[Procesador %d] Proceso %d filas\n   ", rank, numerofilas);
       
       filainicio = numerofilas+1;
@@ -95,7 +96,7 @@ int main(int argc, char *argv[]){
          MPI_Send(&numfilas, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
          
          for(f=filainicio-1; f<filainicio+numfilas+1; f++){
-	         MPI_Send(&original[f][0], alto, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
+	         MPI_Send(&original[f][0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
          }
 
  	      printf("[Procesador %d] Filainicio: %d, numfilas: %d\n", i, filainicio, numfilas); 
@@ -104,15 +105,15 @@ int main(int argc, char *argv[]){
       }
       
       numfilas = numerofilas;
-      salida = (unsigned char**)GetMem2D(largo, alto, sizeof(unsigned char));
+      salida = (unsigned char**)GetMem2D(alto, ancho, sizeof(unsigned char));
    
    }else{
       printf ("[Procesador %d]\n", rank);
       
       fflush(stdout);
       
-      MPI_Recv (&alto, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
-      printf ("[Procesador %d] Recibido alto de la imagen: %d\n", rank, alto);
+      MPI_Recv (&ancho, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+      printf ("[Procesador %d] Recibido ancho de la imagen: %d\n", rank, ancho);
       
       MPI_Recv (&k, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
       printf ("[Procesador %d] Recibido k: %d\n", rank, k);
@@ -120,17 +121,17 @@ int main(int argc, char *argv[]){
       MPI_Recv (&numfilas, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);      
       printf ("[Procesador %d] Recibido numfilas: %d\n", rank, numfilas);
 
-      original = (unsigned char **)GetMem2D(numfilas+2, alto, sizeof(unsigned char));
-      printf ("[Procesador %d] Imagen procesada de %dx%d\n", rank, numfilas+2, alto);
+      original = (unsigned char **)GetMem2D(numfilas+2, ancho, sizeof(unsigned char));
+      printf ("[Procesador %d] Imagen procesada de %dx%d\n", rank, numfilas+2, ancho);
       
       for (f=0; f<numfilas+2; f++){
-            MPI_Recv (&original[f][0], alto, MPI_CHAR, 0, TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv (&original[f][0], ancho, MPI_CHAR, 0, TAG, MPI_COMM_WORLD, &status);
          }
          
-      salida = (unsigned char **)GetMem2D(numfilas+2, alto, sizeof(unsigned char));
+      salida = (unsigned char **)GetMem2D(numfilas+2, ancho, sizeof(unsigned char));
    }
-
-   convolucion(original, numfilas+2, largo, nucleo, k, salida);
+   printf("soy %d\n", rank);
+   convolucion(original, numfilas+2, alto, nucleo, k, salida, rank);
    
    f = numfilas+1;
    
@@ -138,7 +139,7 @@ int main(int argc, char *argv[]){
       
       for (i=1; i<size; i++){
          MPI_Recv (&numfilas, 1, MPI_INT, i, TAG, MPI_COMM_WORLD, &status);
-	      aux = (unsigned char *)GetMem2D(alto, largo, sizeof(unsigned char));
+	      aux = (unsigned char *)GetMem2D(ancho, alto, sizeof(unsigned char));
          
          printf("[Procesador %d] Fila recibida:\n", rank);
          for (j=0; j<numfilas; j++){
@@ -146,9 +147,9 @@ int main(int argc, char *argv[]){
             if(j != 0 && (j%20==0 || j == numfilas-1))
                printf("\n");
                
-            MPI_Recv (&aux[0], alto, MPI_CHAR, i, TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv (&aux[0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD, &status);
 	    
-            for (k=0; k<alto; k++)
+            for (k=0; k<ancho; k++)
 		         salida[f+j][k] = aux[k];
          }
 	      
@@ -157,20 +158,20 @@ int main(int argc, char *argv[]){
          f += numfilas;
       }
 
-      pgmwrite(salida, "lena_procesada_mpi.pgm", largo, alto);
+      pgmwrite(salida, "lena_procesada_mpi.pgm", alto, ancho);
 
       for(i=1; i<size; i++)
 	      MPI_Send (&i, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
 
-      Free2D((void**) original, largo);
-      Free2D((void**) salida, largo);
+      Free2D((void**) original, alto);
+      Free2D((void**) salida, alto);
    
    }else {
       
       MPI_Send (&numfilas, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD);
       
       for (f=1; f<numfilas+1; f++){
-         MPI_Send (&salida[f][0], alto, MPI_CHAR, 0, TAG, MPI_COMM_WORLD);
+         MPI_Send (&salida[f][0], ancho, MPI_CHAR, 0, TAG, MPI_COMM_WORLD);
       }
       
       Free2D((void**) original, numfilas+2);
