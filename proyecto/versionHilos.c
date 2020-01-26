@@ -3,6 +3,9 @@
 #include <string.h>
 #include <pthread.h>
 #include "pgm.h"
+#include<stdbool.h>
+
+#define tamanoNucleo 3
 
 typedef struct{
 	unsigned char **original;
@@ -29,8 +32,8 @@ void *convolucion(void *parametro){
   for (x = 0; x < h->numfilas; x++){
     for (y = 1; y < h->datos->alto-1; y++){
       suma = 0;
-      for (i = 0; i < 3; i++){
-        for (j = 0; j < 3; j++){
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
             suma = suma + h->datos->original[(f-1)+i][(y-1)+j] * h->datos->nucleo[i][j];
         }
       }
@@ -52,28 +55,32 @@ int main(int argc, char *argv[]){
   tipohilo *mishilos;
   pthread_t *mispthread;
   tipodato misdatos;
+  bool flag  =true;
 
-  if (argc != 2)
-  {
-     printf ("\nError en la llamada, hay que indicar el numero de hilos\n\n");
-     exit(1);
-  }
-  sscanf (argv[1], "%d", &numhilos);
+  while(flag){
+        printf("Numero de hilos a usar: ");
+        scanf ("%d", &numhilos);
+        if(numhilos < 1){
+            printf("Valores > 0\n");
+        }else{
+            flag = false;
+        }
+    }
 
   misdatos.original = pgmread("lena_original.pgm", &misdatos.largo, &misdatos.alto);
   Salida = (unsigned char**)GetMem2D(misdatos.largo, misdatos.alto, sizeof(unsigned char));
 
-  misdatos.nucleo = (int**) GetMem2D(3, 3, sizeof(int));
-  for (i = 0; i < 3; i++){
-    for (j = 0; j < 3; j++){
+  misdatos.nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
+  for (i = 0; i < tamanoNucleo; i++){
+    for (j = 0; j < tamanoNucleo; j++){
       misdatos.nucleo[i][j] = -1;
     }
-  }misdatos.nucleo[1][1] = 1;
+  }misdatos.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1;
   
   misdatos.k = 0;
   
-  for (i = 0; i < 3; i++){
-    for (j = 0; j < 3; j++){
+  for (i = 0; i < tamanoNucleo; i++){
+    for (j = 0; j < tamanoNucleo; j++){
       misdatos.k = misdatos.k + misdatos.nucleo[i][j];
     }
   }
@@ -110,9 +117,9 @@ int main(int argc, char *argv[]){
     }
   }
 
-  pgmwrite(Salida, "lena_procesada.pgm", misdatos.largo, misdatos.alto);
+  pgmwrite(Salida, "lena_procesada_hilos.pgm", misdatos.largo, misdatos.alto);
 
-  Free2D((void**) misdatos.nucleo, 3);
+  Free2D((void**) misdatos.nucleo, tamanoNucleo);
 
   Free2D((void**) misdatos.original, misdatos.largo);
   Free2D((void**) Salida, misdatos.largo);

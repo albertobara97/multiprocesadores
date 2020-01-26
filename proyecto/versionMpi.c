@@ -7,14 +7,15 @@
 #define TAG 10
 #define tamanoNucleo 3
 
-void convolucion(unsigned char **original, int numfilas, int alto, int **nucleo, int k, unsigned char **salida, int rank) {
+void convolucion(unsigned char **original, int numfilas, int ancho, int **nucleo, int k, unsigned char **salida, int rank) {
    int x, y;
    int suma;
    int i, j;
+   //printf("%d\n ", rank);
 
    for (x=0; x<numfilas; x++){
-      for (y=0; y<alto; y++){
-	      if (x == 0 || x == numfilas-1 || y == 0 || y == alto-1)
+      for (y=0; y<ancho; y++){
+	      if (x == 0 || x == numfilas-1 || y == 0 || y == ancho-1)
 	         salida[x][y] = original[x][y];
 	      else{
 	         suma = 0;
@@ -24,10 +25,10 @@ void convolucion(unsigned char **original, int numfilas, int alto, int **nucleo,
               }
            }
 	         if(k==0){
-               printf("[Procesador %d](%d, %d)-------k = 0...\n", rank, x, y);
+               //printf("[Procesador %d](%d, %d)-------k = 0...\n", rank, x, y);
         	      salida[x][y] = suma;
             }else{
-               printf("[Procesador %d](%d, %d)-------k != 0...\n", rank, x, y);
+               //printf("[Procesador %d](%d, %d)-------k != 0...\n", rank, x, y);
         	      salida[x][y] = suma/k;
             }
 	      }
@@ -50,14 +51,15 @@ int main(int argc, char *argv[]){
    MPI_Comm_size (MPI_COMM_WORLD, &size);
    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 
-
+   //reserva memoria para la matriz del nucleo
    nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
    
+   //recorre y rellena la metriz de nucleo
    for (i = 0; i < tamanoNucleo; i++){
       for (j = 0; j < tamanoNucleo; j++){
          nucleo[i][j] = -1;
       }
-   }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 8;
+   }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1; 
 
    if (rank == 0){
    
@@ -95,9 +97,14 @@ int main(int argc, char *argv[]){
          
          
          MPI_Send(&numfilas, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
-         
+         //if(i == 3) numfilas -=1;
          for(f=filainicio-1; f<filainicio+numfilas+1; f++){
-	         MPI_Send(&original[f][0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
+	         /*if(i == 3 && f == filainicio+numfilas-1){
+               printf("llego %d\n", f);
+               MPI_Send(&original[f-5][0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
+            }else{*/
+               MPI_Send(&original[f][0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
+            //}
          }
 
  	      printf("[Procesador %d] Filainicio: %d, numfilas: %d\n", i, filainicio, numfilas); 
@@ -124,15 +131,21 @@ int main(int argc, char *argv[]){
 
       original = (unsigned char **)GetMem2D(numfilas+2, ancho, sizeof(unsigned char));
       printf ("[Procesador %d] Imagen procesada de %dx%d\n", rank, numfilas+2, ancho);
-      
+      //if(rank == 3) numfilas -= 1;
       for (f=0; f<numfilas+2; f++){
             MPI_Recv (&original[f][0], ancho, MPI_CHAR, 0, TAG, MPI_COMM_WORLD, &status);
+            /*if(rank == 3 && f == numfilas+1){
+               for(int t = 0; t<ancho; t++){
+                  original[f][t] = original[f-1][t];
+               }
+            }*/
          }
          
       salida = (unsigned char **)GetMem2D(numfilas+2, ancho, sizeof(unsigned char));
    }
-   printf("soy %d\n", rank);
-   convolucion(original, numfilas+2, alto, nucleo, k, salida, rank);
+   //printf("Alto: %d\n", alto);
+   //if(rank == 3) numfilas -= 1;
+   convolucion(original, numfilas+2, ancho, nucleo, k, salida, rank);
    
    f = numfilas+1;
    
@@ -171,8 +184,8 @@ int main(int argc, char *argv[]){
    }else {
       
       MPI_Send (&numfilas, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD);
-      
-      for (f=1; f<numfilas+1; f++){
+      //envia convoluciones a procesador 0
+      for (f=0; f<numfilas; f++){
          MPI_Send (&salida[f][0], ancho, MPI_CHAR, 0, TAG, MPI_COMM_WORLD);
       }
       
