@@ -24,23 +24,22 @@ void convolucion(unsigned char **original, int numfilas, int alto, int **nucleo,
               }
            }
 	         if(k==0){
-               //printf("[Procesador %d](%d, %d)-------k = 0...\n", rank, x, y);
+               printf("[Procesador %d](%d, %d)-------k = 0...\n", rank, x, y);
         	      salida[x][y] = suma;
             }else{
-               //printf("[Procesador %d](%d, %d)-------k != 0...\n", rank, x, y);
+               printf("[Procesador %d](%d, %d)-------k != 0...\n", rank, x, y);
         	      salida[x][y] = suma/k;
             }
 	      }
       }
    }
-   printf("llego");
 }
 
 /* * * * *          * * * * *          * * * * *          * * * * */
 
 int main(int argc, char *argv[]){
-   int alto, ancho;
-   int k, rank, size, i, j, f/*, fila*/, filainicio, numfilas, numerofilas, excedente;
+   
+   int alto, ancho, k, rank, size, i, j, f, filainicio, numfilas, numerofilas, excedente;
    unsigned char** original;
    unsigned char** salida;
    unsigned char* aux;
@@ -66,9 +65,11 @@ int main(int argc, char *argv[]){
 
       
       k = 0;
-      for (i = 0; i < tamanoNucleo; i++)
-         for (j = 0; j < tamanoNucleo; j++)
+      for (i = 0; i < tamanoNucleo; i++){
+         for (j = 0; j < tamanoNucleo; j++){
             k = k + nucleo[i][j];
+         }
+      }
 
       
       for (i=1; i<size; i++){
@@ -144,13 +145,14 @@ int main(int argc, char *argv[]){
          printf("[Procesador %d] Fila recibida:\n", rank);
          for (j=0; j<numfilas; j++){
             printf (" %d", f+j);
-            if(j != 0 && (j%20==0 || j == numfilas-1))
+            if(j != 0 && ((j+1)%20==0 || j == numfilas-1))
                printf("\n");
                
             MPI_Recv (&aux[0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD, &status);
 	    
-            for (k=0; k<ancho; k++)
+            for (k=0; k<ancho; k++){
 		         salida[f+j][k] = aux[k];
+            }
          }
 	      
          free(aux);
