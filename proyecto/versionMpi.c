@@ -43,7 +43,7 @@ int nucleosDisponibles(){
     int operacion;
     
     while(flag){
-            printf("operacion a realizar?\n\t0. Salir del programa\n\t1. Nucleo estándar\n\t2. Nucleo Paso bajo\n\t3. Calcular los enteros correspondientes de una frase\n\t4. Realizar todas las operaciones anteriores\n");
+            printf("Filtro en función del nucleo\n\t0. Salir del programa\n\t1. Núcleo estándar\n\t2. Núcleo Paso bajo\n\t3. Núcleo Paso alto\n\t4. \n");
             scanf ("%d", &operacion);
 
             if(operacion > 4 || operacion < 0){
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
    MPI_Comm_size (MPI_COMM_WORLD, &size);
    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 
-   //reserva memoria para la matriz del nucleo
+   //Reserva memoria para la matriz del nucleo
    nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
    
    
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
          break;*/
          case 1: 
             printf("Nucleo estándar\n\n");
-            //recorre y rellena la metriz de nucleo
+            //Recorre y rellena la matriz del nucleo
             for (i = 0; i < tamanoNucleo; i++){
                for (j = 0; j < tamanoNucleo; j++){
                   nucleo[i][j] = -1;
@@ -97,6 +97,22 @@ int main(int argc, char *argv[]){
             }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1;
          break;
          case 2:
+            printf("Nucleo Paso bajo\n\n");
+            for (i = 0; i < tamanoNucleo; i++){
+               for (j = 0; j < tamanoNucleo; j++){
+                  nucleo[i][j] = 1;
+               }
+            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 0;
+         break;
+         case 3:
+            printf("Nucleo Paso alto\n\n");
+            for (i = 0; i < tamanoNucleo; i++){
+               for (j = 0; j < tamanoNucleo; j++){
+                  nucleo[i][j] = -1;
+               }
+            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 8;
+         break;
+         case 4:
             printf("Nucleo Paso bajo\n\n");
             for (i = 0; i < tamanoNucleo; i++){
                for (j = 0; j < tamanoNucleo; j++){
@@ -242,7 +258,7 @@ int main(int argc, char *argv[]){
    }else {
       
       MPI_Send (&numfilas, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD);
-      //envia convoluciones a procesador 0
+      //Envía convoluciones a procesador 0
       for (f=0; f<numfilas; f++){
          MPI_Send (&salida[f][0], ancho, MPI_CHAR, 0, TAG, MPI_COMM_WORLD);
       }
