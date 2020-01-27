@@ -43,7 +43,7 @@ int nucleosDisponibles(){
     int operacion;
     
     while(flag){
-            printf("operacion a realizar?\n\t0. Salir del programa\n\t1. Pasar una palabra a mayuscula\n\t2. Calcular suma de un vector y la raiz cuadrada de la suma \n\t3. Calcular los enteros correspondientes de una frase\n\t4. Realizar todas las operaciones anteriores\n");
+            printf("operacion a realizar?\n\t0. Salir del programa\n\t1. Nucleo estándar\n\t2. Nucleo Paso bajo\n\t3. Calcular los enteros correspondientes de una frase\n\t4. Realizar todas las operaciones anteriores\n");
             scanf ("%d", &operacion);
 
             if(operacion > 4 || operacion < 0){
@@ -82,13 +82,13 @@ int main(int argc, char *argv[]){
       
       operacion = nucleosDisponibles();
       switch(operacion){
-         case 0:
+         /*case 0:
             printf("\nSaliendo del programa...\n\n");
                MPI_Finalize();
                //exit(0);
-         break;
+         break;*/
          case 1: 
-            printf("Nucleo Paso alto\n\n");
+            printf("Nucleo estándar\n\n");
             //recorre y rellena la metriz de nucleo
             for (i = 0; i < tamanoNucleo; i++){
                for (j = 0; j < tamanoNucleo; j++){
@@ -105,11 +105,14 @@ int main(int argc, char *argv[]){
             }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 0;
          break;
       }
-      for(i = 0; i<tamanoNucleo; i++){
+      for(i = 1; i<size; i++){
          MPI_Send(&operacion, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
-         MPI_Send(&nucleo[i][0], tamanoNucleo, MPI_INT, i, TAG, MPI_COMM_WORLD);
+         
       }
-
+      if(operacion == 0){
+         MPI_Finalize();
+         exit(0);
+      }
       
       k = 0;
       for (i = 0; i < tamanoNucleo; i++){
@@ -120,7 +123,9 @@ int main(int argc, char *argv[]){
 
       
       for (i=1; i<size; i++){
-
+         for(j = 0; j<tamanoNucleo; j++){
+            MPI_Send(&nucleo[j][0], tamanoNucleo, MPI_INT, i, TAG, MPI_COMM_WORLD);
+         }
          MPI_Send(&ancho, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
          MPI_Send(&k, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
       }
@@ -167,10 +172,11 @@ int main(int argc, char *argv[]){
       MPI_Recv (&operacion, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
       if(operacion==0){
          MPI_Finalize();
-         //exit(0);
+         exit(0);
       }
-
-      MPI_Recv (&nucleo[i][0], tamanoNucleo, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+      for(i = 0; i<tamanoNucleo; i++){
+         MPI_Recv (&nucleo[i][0], tamanoNucleo, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+      }
       
       MPI_Recv (&ancho, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
       printf ("[Procesador %d] Recibido ancho de la imagen: %d\n", rank, ancho);
