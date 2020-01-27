@@ -3,6 +3,7 @@
 #include <string.h>
 #include "mpi.h"
 #include "pgm.h"
+#include <stdbool.h>
 
 #define TAG 10
 #define tamanoNucleo 3
@@ -36,16 +37,36 @@ void convolucion(unsigned char **original, int numfilas, int ancho, int **nucleo
    }
 }
 
+int nucleosDisponibles(){
+    
+    bool flag = true;
+    int operacion;
+    
+    while(flag){
+            printf("operacion a realizar?\n\t0. Salir del programa\n\t1. Pasar una palabra a mayuscula\n\t2. Calcular suma de un vector y la raiz cuadrada de la suma \n\t3. Calcular los enteros correspondientes de una frase\n\t4. Realizar todas las operaciones anteriores\n");
+            scanf ("%d", &operacion);
+
+            if(operacion > 4 || operacion < 0){
+                printf("Debes de escoger entre 0 y 4\n");
+            }else{
+                flag = false;
+            }
+        }flag = true;
+
+    return operacion;
+}
+
 /* * * * *          * * * * *          * * * * *          * * * * */
 
 int main(int argc, char *argv[]){
    
-   int alto, ancho, k, rank, size, i, j, f, filainicio, numfilas, numerofilas, excedente;
+   int alto, ancho, operacion, k, rank, size, i, j, f, filainicio, numfilas, numerofilas, excedente;
    unsigned char** original;
    unsigned char** salida;
    unsigned char* aux;
    int **nucleo;
    MPI_Status status;
+   bool flag;
 
    MPI_Init (&argc, &argv);
    MPI_Comm_size (MPI_COMM_WORLD, &size);
@@ -54,16 +75,40 @@ int main(int argc, char *argv[]){
    //reserva memoria para la matriz del nucleo
    nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
    
-   //recorre y rellena la metriz de nucleo
-   for (i = 0; i < tamanoNucleo; i++){
-      for (j = 0; j < tamanoNucleo; j++){
-         nucleo[i][j] = -1;
-      }
-   }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1; 
-
+   
    if (rank == 0){
    
       original = pgmread("lena_original.pgm", &alto, &ancho);
+      
+      operacion = nucleosDisponibles();
+      switch(operacion){
+         case 0:
+            printf("\nSaliendo del programa...\n\n");
+               MPI_Finalize();
+               //exit(0);
+         break;
+         case 1: 
+            printf("Nucleo Paso alto\n\n");
+            //recorre y rellena la metriz de nucleo
+            for (i = 0; i < tamanoNucleo; i++){
+               for (j = 0; j < tamanoNucleo; j++){
+                  nucleo[i][j] = -1;
+               }
+            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1;
+         break;
+         case 2:
+            printf("Nucleo Paso bajo\n\n");
+            for (i = 0; i < tamanoNucleo; i++){
+               for (j = 0; j < tamanoNucleo; j++){
+                  nucleo[i][j] = 1;
+               }
+            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 0;
+         break;
+      }
+      for(i = 0; i<tamanoNucleo; i++){
+         MPI_Send(&operacion, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
+         MPI_Send(&nucleo[i][0], tamanoNucleo, MPI_INT, i, TAG, MPI_COMM_WORLD);
+      }
 
       
       k = 0;
@@ -118,7 +163,14 @@ int main(int argc, char *argv[]){
    }else{
       printf ("[Procesador %d]\n", rank);
       
-      fflush(stdout);
+      //fflush(stdout);
+      MPI_Recv (&operacion, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+      if(operacion==0){
+         MPI_Finalize();
+         //exit(0);
+      }
+
+      MPI_Recv (&nucleo[i][0], tamanoNucleo, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
       
       MPI_Recv (&ancho, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
       printf ("[Procesador %d] Recibido ancho de la imagen: %d\n", rank, ancho);
