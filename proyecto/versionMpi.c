@@ -43,11 +43,11 @@ int nucleosDisponibles(){
     int operacion;
     
     while(flag){
-            printf("Filtro en función del nucleo\n\t0. Salir del programa\n\t1. Núcleo estándar\n\t2. Núcleo Paso bajo\n\t3. Núcleo Paso alto\n\t4. \n");
+            printf("Filtro en función del nucleo\n\t0. Salir del programa\n\t1. Núcleo estándar\n\t2. Núcleo Paso bajo\n\t3. Núcleo Paso alto\n\t4. Núcleo Laplaciano \n\t5. Núcleo Grupo20\n");
             scanf ("%d", &operacion);
 
-            if(operacion > 4 || operacion < 0){
-                printf("Debes de escoger entre 0 y 4\n");
+            if(operacion > 5 || operacion < 0){
+                printf("Debes de escoger entre 0 y 5\n");
             }else{
                 flag = false;
             }
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
             }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 0;
          break;
          case 3:
-            printf("Nucleo Paso alto\n\n");
+            printf("Núcleo Paso bajo\n\n");
             for (i = 0; i < tamanoNucleo; i++){
                for (j = 0; j < tamanoNucleo; j++){
                   nucleo[i][j] = -1;
@@ -113,12 +113,26 @@ int main(int argc, char *argv[]){
             }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 8;
          break;
          case 4:
-            printf("Nucleo Paso bajo\n\n");
+            printf("Núcleo Gaussiano\n\n");
             for (i = 0; i < tamanoNucleo; i++){
                for (j = 0; j < tamanoNucleo; j++){
-                  nucleo[i][j] = 1;
+                  if(j%2==0){
+                     nucleo[i][j] = 2;
+                  }else
+                  {
+                     nucleo[i][j] = 1;
+                  }
+                  
                }
-            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 0;
+            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 4;
+         break;
+         case 5:
+            printf("Núcleo Grupo20\n\n");
+            for (i = 0; i < tamanoNucleo; i++){
+               for (j = 0; j < tamanoNucleo; j++){
+                  nucleo[i][j] = -3;
+               }
+            }nucleo[tamanoNucleo/2][tamanoNucleo/2] = 10;
          break;
       }
       for(i = 1; i<size; i++){
