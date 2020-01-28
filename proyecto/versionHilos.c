@@ -7,7 +7,7 @@
 int tamanoNucleo;
 //#define tamanoNucleo 3
 
-//Se crea una estructura global que almacena variables globales
+//Se crea una estructura que almacena variables globales
 typedef struct{
 	unsigned char **original;
 	int **nucleo;
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]){
       printf("%d ", structHilos[n].filainicio + i);
         if(i != 0 && ((i+1)%20==0 || i == structHilos[n].numfilas-1))
           printf("\n");
-      //Recorre cada celda de la fila la almacena en la matriz salida de la estructura salida
+      //Recorre cada celda de la fila  y la almacena en la matriz salida
       for (j=1; j<variables.alto-1; j++){
         
         salida[structHilos[n].filainicio + i][j] = structHilos[n].salida[i][j];
