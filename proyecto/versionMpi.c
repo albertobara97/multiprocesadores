@@ -43,7 +43,7 @@ int nucleosDisponibles(){
     int operacion;
     
     while(flag){
-            printf("Filtro en función del nucleo\n\t0. Salir del programa\n\t1. Núcleo estándar\n\t2. Núcleo Paso bajo\n\t3. Núcleo Paso alto\n\t4. Núcleo Laplaciano \n\t5. Núcleo Grupo20\n");
+            printf("Filtro en función del nucleo\n\t0. Salir del programa\n\t1. Núcleo estándar\n\t2. Núcleo Paso bajo\n\t3. Núcleo Paso alto\n\t4. Núcleo Gaussiano \n\t5. Núcleo Grupo20\n");
             scanf ("%d", &operacion);
 
             if(operacion > 5 || operacion < 0){
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
          }
       }
 
-      
+      //Reparto de la matriz núcleo a cada procesador
       for (i=1; i<size; i++){
          for(j = 0; j<tamanoNucleo; j++){
             MPI_Send(&nucleo[j][0], tamanoNucleo, MPI_INT, i, TAG, MPI_COMM_WORLD);
@@ -160,12 +160,12 @@ int main(int argc, char *argv[]){
          MPI_Send(&k, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
       }
 
-      numerofilas = (alto-2) / size;
-      excedente = (alto-2) % size;
+      numerofilas = (ancho-2) / size;
+      excedente = (ancho-2) % size;
       printf("[Procesador %d] Proceso %d filas\n   ", rank, numerofilas);
       
+      //Selección de fila inicio
       filainicio = numerofilas+1;
-      
       for (i=1; i<size; i++){
 	      
          numfilas = numerofilas;
@@ -174,8 +174,7 @@ int main(int argc, char *argv[]){
 	         numfilas++;
 	         excedente--;
 	      }
-         
-         
+                  
          MPI_Send(&numfilas, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
          //if(i == 3) numfilas -=1;
          for(f=filainicio-1; f<filainicio+numfilas+1; f++){
@@ -183,7 +182,7 @@ int main(int argc, char *argv[]){
                printf("llego %d\n", f);
                MPI_Send(&original[f-5][0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
             }else{*/
-               MPI_Send(&original[f][0], ancho, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
+               MPI_Send(&original[f][0], alto, MPI_CHAR, i, TAG, MPI_COMM_WORLD);
             //}
          }
 
@@ -257,14 +256,14 @@ int main(int argc, char *argv[]){
          }
 	      
          free(aux);
-
          f += numfilas;
       }
 
       pgmwrite(salida, "lena_procesada_mpi.pgm", alto, ancho);
 
-      for(i=1; i<size; i++)
+      /*for(i=1; i<size; i++){
 	      MPI_Send (&i, 1, MPI_INT, i, TAG, MPI_COMM_WORLD);
+      }*/
 
       Free2D((void**) original, alto);
       Free2D((void**) salida, alto);
@@ -280,7 +279,7 @@ int main(int argc, char *argv[]){
       Free2D((void**) original, numfilas+2);
       Free2D((void**) salida, numfilas+2);
       
-      MPI_Recv (&k, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
+      //MPI_Recv (&k, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &status);
    }
 
    Free2D((void**) nucleo, tamanoNucleo);
