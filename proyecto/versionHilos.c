@@ -4,8 +4,8 @@
 #include <pthread.h>
 #include "pgm.h"
 #include<stdbool.h>
-
-#define tamanoNucleo 3
+int tamanoNucleo;
+//#define tamanoNucleo 3
 
 typedef struct{
 	unsigned char **original;
@@ -20,15 +20,33 @@ typedef struct{
 	unsigned char **salida;
 	int filainicio;
 	int numfilas;
+  bool nucleoExtendido;
 }hilo;
 
 void *convolucion(void *parametro){
   int x, y, suma, i, j, f;
 
   hilo *h = (hilo *) parametro;
-
-  printf ("\nFila inicio %d  y total %d", h->filainicio, h->numfilas);
-  f = h->filainicio;
+  if(h->nucleoExtendido == true){
+    f = h->filainicio;
+    for (x = 0; x < h->numfilas; x++){
+      for (y = 2; y < h->datos->alto-2; y++){
+        suma = 0;
+        for (i = 0; i < tamanoNucleo; i++){
+          for (j = 0; j < tamanoNucleo; j++){
+              suma = suma + h->datos->original[(f-2)+i][(y-2)+j] * h->datos->nucleo[i][j];
+          }
+        }
+        if(h->datos->k==0){
+          h->salida[x][y] = suma;
+        }else{
+          h->salida[x][y] = suma/h->datos->k;
+        }
+      }
+      f++;
+    }
+  }else{
+    f = h->filainicio;
   for (x = 0; x < h->numfilas; x++){
     for (y = 1; y < h->datos->alto-1; y++){
       suma = 0;
@@ -45,12 +63,36 @@ void *convolucion(void *parametro){
     }
     f++;
   }
+  }
+  printf ("Fila inicio %d  y total %d\n", h->filainicio, h->numfilas);
+  
+}
+
+int nucleosDisponibles(){
+    
+  bool flag = true;
+  int operacion;
+  
+  while(flag){
+          printf("Filtro en función del nucleo\n\t0. Salir del programa\n\t1. Núcleo estándar (3)\n\t");
+          printf("2. Núcleo Paso bajo (3)\n\t3. Núcleo Paso alto (3)\n\t4. Núcleo Gaussiano (3)\n\t");
+          printf("5. Núcleo Grupo20 (3)\n\t6. Núcleo Gaussiano (5)\n");
+          scanf ("%d", &operacion);
+
+          if(operacion > 6 || operacion < 0){
+              printf("Debes de escoger entre 0 y 6\n");
+          }else{
+              flag = false;
+          }
+      }flag = true;
+
+  return operacion;
 }
 
 /* * * * *          * * * * *          * * * * *          * * * * */
 
 int main(int argc, char *argv[]){
-  int numhilos, i, j, n, fila, numerofilas, excedente;
+  int numhilos, i, j, n, fila, numerofilas, excedente, operacion;
   unsigned char** salida;
   hilo *structHilos;
   pthread_t *mispthread;
@@ -69,14 +111,73 @@ int main(int argc, char *argv[]){
 
   variables.original = pgmread("lena_original.pgm", &variables.ancho, &variables.alto);
   salida = (unsigned char**)GetMem2D(variables.ancho, variables.alto, sizeof(unsigned char));
-
-  variables.nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
-  for (i = 0; i < tamanoNucleo; i++){
-    for (j = 0; j < tamanoNucleo; j++){
-      variables.nucleo[i][j] = -1;
-    }
-  }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1;
   
+  tamanoNucleo = 3;
+  variables.nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
+
+  operacion = nucleosDisponibles();
+  switch(operacion){
+    case 0:
+      printf("\nSaliendo del programa...\n\n");
+          exit(0);
+    break;
+    case 1: 
+      printf("Nucleo estándar (3)\n\n");
+      //Recorre y rellena la matriz del nucleo
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
+          variables.nucleo[i][j] = -1;
+        }
+      }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 1;
+    break;
+    case 2:
+      printf("Nucleo Paso bajo (3)\n\n");
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
+          variables.nucleo[i][j] = 1;
+        }
+      }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 0;
+    break;
+    case 3:
+      printf("Núcleo Paso bajo (3)\n\n");
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
+          variables.nucleo[i][j] = -1;
+        }
+      }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 8;
+    break;
+    case 4:
+      printf("Núcleo Gaussiano (3)\n\n");
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
+          if(j%2==0){
+              variables.nucleo[i][j] = 2;
+          }else{
+              variables.nucleo[i][j] = 1;
+          }
+          
+        }
+      }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 4;
+    break;
+    case 5:
+      printf("Núcleo Grupo20 (3)\n\n");
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
+          variables.nucleo[i][j] = -3;
+        }
+      }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 10;
+    break;
+    case 6:
+      printf("Núcleo Gaussiano (5)\n\n");
+      tamanoNucleo = 5;
+      variables.nucleo = (int**) GetMem2D(tamanoNucleo, tamanoNucleo, sizeof(int));
+      for (i = 0; i < tamanoNucleo; i++){
+        for (j = 0; j < tamanoNucleo; j++){
+          variables.nucleo[i][j] = -3;
+        }
+      }variables.nucleo[tamanoNucleo/2][tamanoNucleo/2] = 10;
+    break;
+  }
   variables.k = 0;
   
   for (i = 0; i < tamanoNucleo; i++){
@@ -88,30 +189,47 @@ int main(int argc, char *argv[]){
   structHilos = (hilo *) malloc (sizeof(hilo) * numhilos);
   mispthread = (pthread_t *) malloc (sizeof(pthread_t) * numhilos);
 
-  fila = 1;
-  numerofilas = (variables.ancho-2) / numhilos;
-  excedente = (variables.ancho-2) % numhilos;
+  
+  if(tamanoNucleo == 3){
+    fila = 1;
+    numerofilas = (variables.ancho-2) / numhilos;
+    excedente = (variables.ancho-2) % numhilos;
+  }else{
+    fila = 2;
+    numerofilas = (variables.ancho-4) / numhilos;
+    excedente = (variables.ancho-4) % numhilos;
+  }
+  
   for (i=0; i<numhilos; i++){
     structHilos[i].datos = &variables;
     structHilos[i].filainicio = fila;
     structHilos[i].numfilas = numerofilas;
 
-      if (excedente > 0){
-        structHilos[i].numfilas++;
-        excedente--;
-      }
+    if(tamanoNucleo == 5){
+      structHilos[i].nucleoExtendido = true;
+    }
+
+    if (excedente > 0){
+      structHilos[i].numfilas++;
+      excedente--;
+    }
 
     structHilos[i].salida = (unsigned char**)GetMem2D(structHilos[i].numfilas, variables.alto, sizeof(unsigned char));
     pthread_create (&mispthread[i], NULL, convolucion, &structHilos[i]);
     fila += structHilos[i].numfilas;
     }
-
+  //Recorre cada hilo
   for (n=0; n<numhilos; n++){
 	  pthread_join (mispthread[n], NULL);
-	  for (i=0; i<structHilos[n].numfilas; i++)
-    {
-      for (j=1; j<variables.alto-1; j++)
-      {
+    printf("[Hilo %d] Filas procesadas:\n", n);
+	  //Recorre cada fila
+    for (i=0; i<structHilos[n].numfilas; i++){
+      printf("%d ", structHilos[n].filainicio + i);
+        if(i != 0 && ((i+1)%20==0 || i == structHilos[n].numfilas-1))
+          printf("\n");
+      //Recorre cada celda de la fila la almacena en la matriz salida de la estructura salida
+      for (j=1; j<variables.alto-1; j++){
+        
         salida[structHilos[n].filainicio + i][j] = structHilos[n].salida[i][j];
       }
     }
@@ -123,8 +241,7 @@ int main(int argc, char *argv[]){
 
   Free2D((void**) variables.original, variables.ancho);
   Free2D((void**) salida, variables.ancho);
-  for (i=0; i<numhilos; i++)
-  {
+  for (i=0; i<numhilos; i++){
      Free2D ((void**) structHilos[i].salida, structHilos[i].numfilas);
   }
   free (structHilos);
